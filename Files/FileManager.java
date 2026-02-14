@@ -16,6 +16,7 @@ public class FileManager {
         }
     }
 
+    // Envoie un fichier au client
     public static void sendFile(String filename, OutputStream out) throws IOException {
         File fichier = new File(FOLDER + filename);
         if (! fichier.exists()) {
