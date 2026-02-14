@@ -3,6 +3,8 @@ package client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import Files.FileManager; 
 
 public class ClientHandler implements Runnable {
     private Socket client;
@@ -17,8 +19,16 @@ public class ClientHandler implements Runnable {
             DataOutputStream out = new DataOutputStream(client.getOutputStream())) {
             String commandes = in.readUTF();
             if (commandes.equals("LIST")) {
-                List<String> fichiers = FileService.listerFiles();
+                ArrayList<String> fichiers = FileManager.listFiles();
+                out.writeInt(fichiers.size());
+                for (String f : fichiers) {
+                    out.writeUTF(f);
+                }
+            } else if (commandes.startsWith("GET:")) {
+                String filename = commandes.substring(4);
+                FileManager.sendFile(filename, out);
             }
+
         } catch (Exception e) {
             // TODO: handle exception
         }

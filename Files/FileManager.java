@@ -13,9 +13,9 @@ public class FileManager {
         }
     }
 
-    public static List<String> listFiles(){
+    public static ArrayList<String> listFiles(){
         File dossier = new File(FOLDER);
         String[] files = dossier.list();
-        return files != null ? Arrays.asList(files) : new ArrayList<>();
+        return files != null ? new ArrayList<>(Arrays.asList(files)) : new ArrayList<>();
     }
 }
