@@ -3,7 +3,9 @@ package server;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ServerListener extends Thread{
+import client.ClientHandler;
+
+public class ServerListener extends Thread {
     private int port;
 
     public ServerListener(int port) {
@@ -17,13 +19,13 @@ public class ServerListener extends Thread{
             // TODO Auto-generated method stub
             System.out.println("Serveur demare sur le port : " + port);
             while (true) {
-                //Attend une connection 
+                // Attend une connection
                 Socket client = serveur.accept();
                 // Donne la gestion a un noveau thread
-                
+                new Thread(new ClientHandler(client)).start();
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            System.err.println("Erreur serveur : " + e.getMessage());
         }
     }
 
@@ -34,5 +36,5 @@ public class ServerListener extends Thread{
     public void setPort(int port) {
         this.port = port;
     }
-    
+
 }
