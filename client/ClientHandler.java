@@ -28,9 +28,8 @@ public class ClientHandler implements Runnable {
                 String filename = commandes.substring(4);
                 FileManager.sendFile(filename, out);
             }
-
         } catch (Exception e) {
-            // TODO: handle exception
+            
         }
     }
 
