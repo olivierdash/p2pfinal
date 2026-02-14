@@ -2,6 +2,7 @@ package client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import Files.FileManager; 
@@ -28,8 +29,10 @@ public class ClientHandler implements Runnable {
                 String filename = commandes.substring(4);
                 FileManager.sendFile(filename, out);
             }
-        } catch (Exception e) {
-            
+        } catch (IOException e) {
+            System.err.println("Erreur connexion entrante : " + e.getMessage());
+        } finally {
+            try { client.close(); } catch (IOException e) {}
         }
     }
 
