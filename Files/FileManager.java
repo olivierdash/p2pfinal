@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.net.Socket;
@@ -54,17 +55,14 @@ public class FileManager {
         return files != null ? new ArrayList<>(Arrays.asList(files)) : new ArrayList<>();
     }
 
-    public static void receiveFile(Socket socket) throws Exception {
-        DataInputStream di = new DataInputStream(socket.getInputStream());
-        String filename = di.readUTF();
-        try (FileOutputStream fos = new FileOutputStream("recu_" + filename)) {
+    public static void receiveFile(String filename, InputStream in) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(FOLDER + "recu_" + filename)) {
             byte[] buffer = new byte[4096];
-            int bytesread;
-
-            while ((bytesread = di.read(buffer)) != -1) {
-                fos.write(buffer, 0, bytesread);
+            int count;
+            // Attention: bloque jusqu'à la fermeture du socket par l'émetteur
+            while ((count = in.read(buffer)) > 0) {
+                fos.write(buffer, 0, count);
             }
-            System.out.println("Fichier recu avec succes");
         }
     }
 }
