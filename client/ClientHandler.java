@@ -32,7 +32,7 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Erreur connexion entrante : " + e.getMessage());
         } finally {
-            try { client.close(); } catch (IOException e) {}
+            try { client.close(); } catch (IOException e) {e.printStackTrace();}
         }
     }
 
