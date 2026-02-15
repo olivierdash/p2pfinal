@@ -37,12 +37,7 @@ public class FileManager {
     }
 
     public static void uploadToSharedFolder(File sourceFile) throws IOException {
-        // On définit la destination : dossier de partage + nom du fichier d'origine
         File destination = new File(FOLDER + sourceFile.getName());
-
-        // On copie le fichier physiquement sur le disque
-        // StandardCopyOption.REPLACE_EXISTING permet d'écraser si le fichier existe
-        // déjà
         Files.copy(sourceFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
         System.out.println("Fichier ajouté au partage : " + sourceFile.getName());
