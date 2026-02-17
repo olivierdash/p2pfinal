@@ -40,7 +40,6 @@ public class FileManager {
     public static void uploadToSharedFolder(File sourceFile) throws IOException {
         File destination = new File(FOLDER + sourceFile.getName());
         Files.copy(sourceFile.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
         System.out.println("Fichier ajouté au partage : " + sourceFile.getName());
     }
 
