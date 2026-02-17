@@ -1,0 +1,6 @@
+FileManager.java
+    => Les files InputStream et les FilesOutpourStream ne manipulent que les octets
+    =>On joue avec les octets car c'est le standard utilise en java
+    =>On a choisi 512 ko car au cas ou une machine sort brusquement du reseau,
+    alors on aura perdu que 512 ko et qu'une autre peut vite le recuperer et le combler
+    =>SHA-256 transforme n'inporte quel donne en une empreinte numerique unique

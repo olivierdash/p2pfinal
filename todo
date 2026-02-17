@@ -1,0 +1,12 @@
+Objectif: partage de fichier peer to peer decentralise pouvant aller jusqu'a 10 machines
+
+Algorithme: segmenter les informations pour que plusieurs machines qui le demandent recoivent toutes des bouts et s'entre remplissent enre elles.
+
+Affichage:- bouton pour lister les fichiers disponibles sur le reseau 
+          - bouton pour deployer un fichier sur le reseau.
+NB: un fichier est considere comme disponible sur le reseau que quand il se trouve dans le dossier partage donc visible par les autres sur le reseau.
+          -champ pour saisir l'adresse ip du destinataire et son port.
+
+fonctionnalites:-le transfert ne peut continuer meme si un appareil est eteint car un autre appareil prendra le relais
+
+code: bien divise les fonctions en petites fontions et diviser les classes en petites classes pour faciliter la maintenance et la lisibilite du code. Utiliser des bibliotheques de gestion de reseau pour faciliter le developpement et assurer une bonne performance. Implementer un systeme de verification d'integrite des fichiers pour s'assurer que les fichiers transferes ne sont pas corrompus.
