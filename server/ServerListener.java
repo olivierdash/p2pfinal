@@ -1,11 +1,11 @@
 package server;
 
+import client.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import client.ClientHandler;
-
 public class ServerListener extends Thread {
+
     private int port;
 
     public ServerListener(int port) {
@@ -15,26 +15,28 @@ public class ServerListener extends Thread {
 
     @Override
     public void run() {
-        try (ServerSocket serveur = new ServerSocket()) {
-            // TODO Auto-generated method stub
-            System.out.println("Serveur demare sur le port : " + port);
-            while (true) {
-                // Attend une connection
-                Socket client = serveur.accept();
-                // Donne la gestion a un noveau thread
-                new Thread(new ClientHandler(client)).start();
+        startServer();
+    }
+
+    private void startServer() {
+        try (ServerSocket server = new ServerSocket(port)) {
+            System.out.println("Serveur P2P actif sur le port : " + port);
+
+            while (!Thread.currentThread().isInterrupted()) { // Plus propre que true
+                try {
+                    acceptClient(server);
+                } catch (Exception e) {
+                    // Si un client échoue, on l'affiche mais on continue d'écouter les autres
+                    System.err.println("Erreur lors de l'acceptation d'un peer : " + e.getMessage());
+                }
             }
         } catch (Exception e) {
-            System.err.println("Erreur serveur : " + e.getMessage());
+            System.err.println("Échec critique du serveur : " + e.getMessage());
         }
     }
 
-    public int getPort() {
-        return port;
+    private void acceptClient(ServerSocket server) throws Exception {
+        Socket client = server.accept();
+        new Thread(new ClientSession(client)).start();
     }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
 }

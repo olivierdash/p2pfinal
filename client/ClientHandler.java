@@ -1,46 +1,48 @@
 package client;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import Files.FileManager; 
+import Files.FileManager;
 
 public class ClientHandler implements Runnable {
     private Socket client;
 
-    public ClientHandler(Socket s){
+    public ClientHandler(Socket s) {
         this.client = s;
     }
 
     @Override
     public void run() {
         try (DataInputStream in = new DataInputStream(client.getInputStream());
-            DataOutputStream out = new DataOutputStream(client.getOutputStream())) {
-            String commandes = in.readUTF();
-            if (commandes.equals("LIST")) {
-                ArrayList<String> fichiers = FileManager.listFiles();
-                out.writeInt(fichiers.size());
-                for (String f : fichiers) {
+                DataOutputStream out = new DataOutputStream(client.getOutputStream())) {
+
+            String command = in.readUTF();
+
+            if (command.equals("LIST")) {
+                var files = FileManager.listFiles();
+                out.writeInt(files.size());
+                for (String f : files)
                     out.writeUTF(f);
+            } else if (command.startsWith("SIZE:")) {
+                String filename = command.substring(5);
+                out.writeLong(FileManager.getFileSize(filename));
+            } else if (command.startsWith("CHUNK:")) {
+                // Format: CHUNK:filename:index
+                String[] parts = command.split(":");
+                String filename = parts[1];
+                int index = Integer.parseInt(parts[2]);
+                FileManager.sendFileChunk(filename, index, out);
+            } else if (command.startsWith("HASH:")) {
+                String filename = command.substring(5);
+                try {
+                    File f = new File("partage/" + filename);
+                    out.writeUTF(FileManager.getFileChecksum(f));
+                } catch (Exception e) {
+                    out.writeUTF("ERROR");
                 }
-            } else if (commandes.startsWith("GET:")) {
-                String filename = commandes.substring(4);
-                FileManager.sendFile(filename, out);
             }
         } catch (IOException e) {
-            System.err.println("Erreur connexion entrante : " + e.getMessage());
-        } finally {
-            try { client.close(); } catch (IOException e) {e.printStackTrace();}
+            System.err.println("Erreur P2P: " + e.getMessage());
         }
-    }
-
-    public Socket getClient() {
-        return client;
-    }
-
-    public void setClient(Socket client) {
-        this.client = client;
     }
 }

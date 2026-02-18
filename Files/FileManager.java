@@ -7,37 +7,32 @@ import java.security.MessageDigest;
 import java.util.*;
 
 public class FileManager {
-    private static final String FOLDER = "partage/";
-    // Taille d'un segment : 512 Ko pour permettre le partage par "bouts"
-    public static final int CHUNK_SIZE = 512 * 1024; 
+    public static final String FOLDER = "partage/";
+    public static final String FOLDER_RECUS = "recus/";
+    public static final int CHUNK_SIZE = 512 * 1024;
 
     public static void init() {
-        File dir = new File(FOLDER);
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
+        new File(FOLDER).mkdir();
+        new File(FOLDER_RECUS).mkdir();
     }
 
-    // Calcule l'empreinte numérique pour vérifier l'intégrité
-    public static String getFileChecksum(File file) throws Exception {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (InputStream fis = new FileInputStream(file)) {
-            byte[] byteArray = new byte[1024];
-            int nread;
-            while ((nread = fis.read(byteArray)) != -1) {
-                digest.update(byteArray, 0, nread);
-            }
-        }
-        byte[] bytes = digest.digest();
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) sb.append(String.format("%02x", b));
-        return sb.toString();
+    // Cherche le fichier dans 'partage' OU 'recus'
+    public static File findFile(String filename) {
+        File f1 = new File(FOLDER + filename);
+        if (f1.exists()) return f1;
+        File f2 = new File(FOLDER_RECUS + filename);
+        if (f2.exists()) return f2;
+        return null;
     }
 
-    // Envoie un segment spécifique (chunkIndex) pour permettre le multi-source
+    public static long getFileSize(String filename) {
+        File f = findFile(filename);
+        return (f != null && f.isFile()) ? f.length() : 0;
+    }
+
     public static void sendFileChunk(String filename, int chunkIndex, OutputStream out) throws IOException {
-        File fichier = new File(FOLDER + filename);
-        if (!fichier.exists()) return;
+        File fichier = findFile(filename);
+        if (fichier == null) return;
 
         try (RandomAccessFile raf = new RandomAccessFile(fichier, "r")) {
             long pos = (long) chunkIndex * CHUNK_SIZE;
@@ -46,7 +41,7 @@ public class FileManager {
             raf.seek(pos);
             byte[] buffer = new byte[CHUNK_SIZE];
             int bytesRead = raf.read(buffer);
-            
+
             if (bytesRead > 0) {
                 out.write(buffer, 0, bytesRead);
             }
@@ -54,9 +49,10 @@ public class FileManager {
         out.flush();
     }
 
-    // Reçoit et écrit un segment à une position précise
-    public static void receiveFileChunk(String filename, int chunkIndex, InputStream in, int length) throws IOException {
-        File target = new File(FOLDER + "recu_" + filename);
+    public static void receiveFileChunk(String filename, int chunkIndex, InputStream in, int length)
+            throws IOException {
+        // On écrit toujours dans "recus/"
+        File target = new File(FOLDER_RECUS + filename);
         try (RandomAccessFile raf = new RandomAccessFile(target, "rw")) {
             raf.seek((long) chunkIndex * CHUNK_SIZE);
             byte[] buffer = new byte[length];
@@ -70,10 +66,30 @@ public class FileManager {
         }
     }
 
+    public static String getFileChecksum(File file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        try (InputStream fis = new FileInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int nread;
+            while ((nread = fis.read(buffer)) != -1) {
+                digest.update(buffer, 0, nread);
+            }
+        }
+        byte[] bytes = digest.digest();
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) sb.append(String.format("%02x", b));
+        return sb.toString();
+    }
+
     public static ArrayList<String> listFiles() {
-        File dossier = new File(FOLDER);
-        String[] files = dossier.list();
-        return files != null ? new ArrayList<>(Arrays.asList(files)) : new ArrayList<>();
+        Set<String> allFiles = new HashSet<>();
+        File d1 = new File(FOLDER);
+        File d2 = new File(FOLDER_RECUS);
+        
+        if (d1.list() != null) Collections.addAll(allFiles, d1.list());
+        if (d2.list() != null) Collections.addAll(allFiles, d2.list());
+        
+        return new ArrayList<>(allFiles);
     }
 
     public static void uploadToSharedFolder(File sourceFile) throws IOException {

@@ -1,0 +1,18 @@
+virus		ver
+support		non
+effets
+	vols: données, argent, identité
+	destruction: données,installation, machine
+	perturbation: DoS, occupation de ressources
+Transmission
+	réseaux dont internet, 
+	supports mobiles, 
+	piratage
+Contre-mesures
+	Méfiance
+	tout le monde est concerné
+	lisez bien les messages
+	Backups + kit de survie
+	toujours à jour
+	protection physique
+	bons mots de passe
